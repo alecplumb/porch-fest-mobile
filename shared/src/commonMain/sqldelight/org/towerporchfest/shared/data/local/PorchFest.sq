@@ -1,0 +1,168 @@
+-- Offline copy of the festival snapshot. This database is a cache: every table except
+-- sync_meta is emptied and refilled in one transaction whenever the server has new data.
+-- Tables end in _row so their generated classes do not collide with the domain models in Swift.
+
+CREATE TABLE genre_row (
+  id INTEGER NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL
+);
+
+CREATE TABLE performer_row (
+  id TEXT NOT NULL PRIMARY KEY,
+  slug TEXT NOT NULL,
+  name TEXT NOT NULL,
+  bio TEXT NOT NULL,
+  link TEXT NOT NULL,
+  image_url TEXT
+);
+
+CREATE TABLE performer_genre (
+  performer_id TEXT NOT NULL,
+  genre_id INTEGER NOT NULL,
+  PRIMARY KEY (performer_id, genre_id)
+);
+
+CREATE TABLE porch_row (
+  id TEXT NOT NULL PRIMARY KEY,
+  slug TEXT NOT NULL,
+  name TEXT NOT NULL,
+  number INTEGER,
+  description TEXT NOT NULL,
+  street_address TEXT NOT NULL,
+  city TEXT NOT NULL,
+  lat REAL NOT NULL,
+  lng REAL NOT NULL,
+  image_url TEXT,
+  sponsor_name TEXT,
+  sponsor_level INTEGER,
+  sponsor_website TEXT,
+  sponsor_logo_url TEXT,
+  sponsored INTEGER AS kotlin.Boolean NOT NULL,
+  vendor INTEGER AS kotlin.Boolean NOT NULL,
+  childrens_activities INTEGER AS kotlin.Boolean NOT NULL,
+  after_party INTEGER AS kotlin.Boolean NOT NULL,
+  parking INTEGER AS kotlin.Boolean NOT NULL,
+  info_booth INTEGER AS kotlin.Boolean NOT NULL,
+  porta_potty INTEGER AS kotlin.Boolean NOT NULL,
+  drinking_water INTEGER AS kotlin.Boolean NOT NULL,
+  bicycle_repair INTEGER AS kotlin.Boolean NOT NULL
+);
+
+-- Times are minutes since midnight on festival day (the backend stores no date).
+-- A set that runs past midnight has end_minute above 1440.
+CREATE TABLE performance_row (
+  id TEXT NOT NULL PRIMARY KEY,
+  porch_id TEXT NOT NULL,
+  performer_id TEXT NOT NULL,
+  start_minute INTEGER NOT NULL,
+  end_minute INTEGER NOT NULL
+);
+
+CREATE INDEX performance_porch ON performance_row(porch_id);
+CREATE INDEX performance_start ON performance_row(start_minute);
+
+CREATE TABLE sync_meta (
+  id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+  etag TEXT,
+  last_synced_at INTEGER NOT NULL
+);
+
+deleteGenres: DELETE FROM genre_row;
+deletePerformers: DELETE FROM performer_row;
+deletePerformerGenres: DELETE FROM performer_genre;
+deletePorches: DELETE FROM porch_row;
+deletePerformances: DELETE FROM performance_row;
+
+insertGenre:
+INSERT INTO genre_row(id, name, slug) VALUES (?, ?, ?);
+
+insertPerformer:
+INSERT INTO performer_row(id, slug, name, bio, link, image_url) VALUES (?, ?, ?, ?, ?, ?);
+
+insertPerformerGenre:
+INSERT OR IGNORE INTO performer_genre(performer_id, genre_id) VALUES (?, ?);
+
+insertPorch:
+INSERT INTO porch_row VALUES ?;
+
+insertPerformance:
+INSERT INTO performance_row(id, porch_id, performer_id, start_minute, end_minute) VALUES (?, ?, ?, ?, ?);
+
+saveSyncMeta:
+INSERT OR REPLACE INTO sync_meta(id, etag, last_synced_at) VALUES (1, ?, ?);
+
+touchSyncMeta:
+UPDATE sync_meta SET last_synced_at = ? WHERE id = 1;
+
+selectSyncMeta:
+SELECT etag, last_synced_at FROM sync_meta WHERE id = 1;
+
+countPerformances:
+SELECT count(*) FROM performance_row;
+
+scheduleRows:
+SELECT
+  pf.id AS performance_id,
+  pf.start_minute,
+  pf.end_minute,
+  pr.name AS performer_name,
+  pr.image_url AS performer_image_url,
+  po.id AS porch_id,
+  po.name AS porch_name,
+  po.number AS porch_number,
+  po.street_address,
+  coalesce((SELECT group_concat(g.name, ', ')
+     FROM performer_genre pg JOIN genre_row g ON g.id = pg.genre_id
+    WHERE pg.performer_id = pr.id), '') AS genre_names
+FROM performance_row pf
+JOIN performer_row pr ON pr.id = pf.performer_id
+JOIN porch_row po ON po.id = pf.porch_id
+WHERE (pr.name LIKE ('%' || :search || '%')
+       OR po.name LIKE ('%' || :search || '%')
+       OR po.street_address LIKE ('%' || :search || '%'))
+  AND (:genreId IS NULL OR EXISTS (
+        SELECT 1 FROM performer_genre pg2
+         WHERE pg2.performer_id = pr.id AND pg2.genre_id = :genreId))
+-- Porches without a number sort after numbered ones (SQLite puts NULL first by default).
+ORDER BY pf.start_minute, po.number IS NULL, po.number, pr.name;
+
+-- Only genres that at least one scheduled performer plays, so every filter chip has results.
+genresInUse:
+SELECT g.id, g.name, g.slug
+FROM genre_row g
+WHERE EXISTS (SELECT 1 FROM performer_genre pg WHERE pg.genre_id = g.id)
+ORDER BY g.name;
+
+mapPins:
+SELECT
+  po.id,
+  po.name,
+  po.number,
+  po.street_address,
+  po.lat,
+  po.lng,
+  po.sponsored,
+  (SELECT count(*) FROM performance_row pf WHERE pf.porch_id = po.id) AS performance_count
+FROM porch_row po
+ORDER BY po.number IS NULL, po.number, po.name;
+
+porchById:
+SELECT * FROM porch_row WHERE id = ?;
+
+performancesForPorch:
+SELECT
+  pf.id AS performance_id,
+  pf.start_minute,
+  pf.end_minute,
+  pr.name AS performer_name,
+  pr.bio AS performer_bio,
+  pr.link AS performer_link,
+  pr.image_url AS performer_image_url,
+  coalesce((SELECT group_concat(g.name, ', ')
+     FROM performer_genre pg JOIN genre_row g ON g.id = pg.genre_id
+    WHERE pg.performer_id = pr.id), '') AS genre_names
+FROM performance_row pf
+JOIN performer_row pr ON pr.id = pf.performer_id
+WHERE pf.porch_id = ?
+ORDER BY pf.start_minute, pr.name;

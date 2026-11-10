@@ -1,0 +1,5 @@
+PF_BASE_URL = https:/$()/towerporchfest.org
+PF_ENVIRONMENT = prod
+PF_BUNDLE_ID_SUFFIX =
+PF_DISPLAY_NAME = Porch Fest
+PF_INFOPLIST = Config/Info-Prod.plist

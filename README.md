@@ -79,3 +79,7 @@ To use a phone, or a backend on another machine, override the local URL without 
 
 To add an environment, add a product flavor in `android/app/build.gradle.kts`, and an xcconfig
 file plus a configuration and scheme in `ios/project.yml`.
+
+## License
+
+[GPL-3.0](LICENSE), the same license as the festival's website.

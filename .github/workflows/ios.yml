@@ -23,6 +23,7 @@ permissions:
 
 jobs:
   build:
+    name: "iOS: build and test"
     # Pushes and pull requests from branches in this repository run on our own Mac.
     # Pull requests from forks contain code we have not reviewed, so they never touch that
     # machine: they run on a GitHub-hosted runner instead. See docs/ci-runner.md.

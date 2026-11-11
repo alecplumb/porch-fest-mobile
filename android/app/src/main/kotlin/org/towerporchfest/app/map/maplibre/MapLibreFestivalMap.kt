@@ -40,9 +40,11 @@ private const val LAYER_PINS = "porch-pins"
 private const val LAYER_PIN_NUMBERS = "porch-pin-numbers"
 private const val LAYER_SELECTED = "porch-selected"
 
-private val PIN_COLOR = Color.parseColor("#D9480F")
-private val SPONSORED_COLOR = Color.parseColor("#1971C2")
-private val CLUSTER_COLOR = Color.parseColor("#5F3DC4")
+// The website's colours: gold porch pins, teal sponsored pins, indigo for clusters.
+private val PIN_COLOR = Color.parseColor("#F2B814")
+private val SPONSORED_COLOR = Color.parseColor("#208F95")
+private val CLUSTER_COLOR = Color.parseColor("#212133")
+private val INDIGO = Color.parseColor("#212133")
 
 /** Fonts served by the OpenFreeMap styles. A style from another provider may need a different name. */
 private val LABEL_FONT = arrayOf("Noto Sans Bold")
@@ -176,7 +178,13 @@ private fun Style.addPinLayers() {
             PropertyFactory.textField(Expression.get(PinProperties.NUMBER)),
             PropertyFactory.textFont(LABEL_FONT),
             PropertyFactory.textSize(11f),
-            PropertyFactory.textColor(Color.WHITE),
+            // Indigo reads on gold; white reads on teal.
+            PropertyFactory.textColor(
+                Expression.switchCase(
+                    Expression.get(PinProperties.SPONSORED), Expression.color(Color.WHITE),
+                    Expression.color(INDIGO),
+                )
+            ),
             PropertyFactory.textAllowOverlap(true),
             PropertyFactory.textIgnorePlacement(true),
         )

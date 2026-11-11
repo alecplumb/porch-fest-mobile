@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-// Backend for the `local` flavor. The default reaches a server on this machine from the
+// Backend for debug builds. The default reaches a server on this machine from the
 // emulator. To test on a physical device, set porchfest.baseUrl=http://<your-mac-ip>:8000
 // in android/local.properties (not committed) or pass -Pporchfest.baseUrl=...
 val localBaseUrl: String = run {
@@ -32,24 +32,18 @@ android {
         versionName = "0.1.0"
     }
 
-    flavorDimensions += "environment"
-    productFlavors {
-        create("local") {
-            dimension = "environment"
-            applicationIdSuffix = ".local"
-            versionNameSuffix = "-local"
+    // Debug builds talk to the local backend; release builds talk to production. Switching
+    // environment inside a debug build will live in the app's Debug Settings screen.
+    buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
             buildConfigField("String", "BASE_URL", "\"$localBaseUrl\"")
             buildConfigField("String", "ENVIRONMENT", "\"local\"")
         }
-        create("prod") {
-            dimension = "environment"
+        release {
             buildConfigField("String", "BASE_URL", "\"https://towerporchfest.org\"")
             buildConfigField("String", "ENVIRONMENT", "\"prod\"")
-        }
-    }
-
-    buildTypes {
-        release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -95,6 +89,10 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)

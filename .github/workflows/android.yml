@@ -39,13 +39,13 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build, unit test and lint the local flavor
+      - name: Build, unit test and lint the debug build
         working-directory: android
-        run: ./gradlew :app:assembleLocalDebug :app:testLocalDebugUnitTest :app:lintLocalDebug
+        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 
-      - name: Compile the prod flavor
+      - name: Compile the release build
         working-directory: android
-        run: ./gradlew :app:compileProdDebugKotlin
+        run: ./gradlew :app:compileReleaseKotlin
 
       - name: Upload lint report
         if: failure()

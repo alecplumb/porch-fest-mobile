@@ -2,7 +2,7 @@ import Foundation
 import Shared
 
 /// Environment settings for this build. The values come from the active xcconfig
-/// (Config/Local.xcconfig or Config/Prod.xcconfig) by way of Info.plist.
+/// (Config/Local.xcconfig for Debug, Config/Prod.xcconfig for Release) by way of Info.plist.
 struct AppEnvironment: Equatable {
     let baseURL: String
     let name: String

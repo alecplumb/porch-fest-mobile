@@ -27,6 +27,11 @@ internal object Fixtures {
     {"id": "perf-2", "porch_id": "porch-plain", "performer_id": "band-solo", "start_time": "13:00:00", "end_time": "14:00:00"},
     {"id": "perf-3", "porch_id": "porch-plain", "performer_id": "band-night", "start_time": "23:30:00", "end_time": "00:30:00"}
   ],
+  "sponsors": [
+    {"id": 3, "name": "Valley Radio", "level": 0, "website": "https://example.com/radio", "logo_url": "http://test/media/sponsors/logos/radio.jpg", "porch_id": null},
+    {"id": 1, "name": "Tower Yoga", "level": 2, "website": "", "logo_url": "http://test/media/sponsors/logos/yoga.jpg", "porch_id": "porch-blue"},
+    {"id": 2, "name": "alpha Print", "level": 2, "website": "https://example.com/print", "logo_url": null, "porch_id": null}
+  ],
   "a_field_added_later": true
 }
 """
@@ -46,6 +51,23 @@ internal object Fixtures {
   "performances": [
     {"id": "perf-1", "porch_id": "porch-blue", "performer_id": "band-olives", "start_time": "15:00:00", "end_time": "15:45:00"}
   ]
+}
+"""
+
+    /** What a backend without the top-level sponsors list sends: sponsors only nested in porches. */
+    const val SNAPSHOT_WITHOUT_SPONSOR_LIST = """
+{
+  "schema_version": 1,
+  "genres": [],
+  "performers": [],
+  "porches": [
+    {"id": "porch-blue", "slug": "blue-porch", "name": "Blue Porch", "number": 7, "description": "", "street_address": "123 Olive Ave", "city": "Fresno", "lat": 36.765, "lng": -119.805, "image_url": null,
+     "sponsor": {"name": "Tower Yoga", "level": 2, "website": "", "logo_url": "http://test/media/sponsors/logos/yoga.jpg"},
+     "sponsored": true, "vendor": false, "childrens_activities": false, "after_party": false, "parking": false, "info_booth": false, "porta_potty": false, "drinking_water": false, "bicycle_repair": false},
+    {"id": "porch-plain", "slug": "", "name": "", "number": null, "description": "", "street_address": "9 Wishon Ave", "city": "Fresno", "lat": 36.76, "lng": -119.8, "image_url": null, "sponsor": null,
+     "sponsored": false, "vendor": false, "childrens_activities": false, "after_party": false, "parking": false, "info_booth": false, "porta_potty": false, "drinking_water": false, "bicycle_repair": false}
+  ],
+  "performances": []
 }
 """
 

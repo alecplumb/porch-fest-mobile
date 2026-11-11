@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Brand colours from the website (porch-fest-django, sass/variables/_color.scss). -->
+<resources>
+    <color name="brand_indigo">#212133</color>
+    <color name="brand_blue">#6F91A5</color>
+    <color name="brand_gold">#F2B814</color>
+    <color name="brand_beige">#EBE2D8</color>
+</resources>

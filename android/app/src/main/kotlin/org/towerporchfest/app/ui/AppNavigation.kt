@@ -16,6 +16,10 @@ data object Home : NavKey
 @Serializable
 data class PorchDetail(val porchId: String) : NavKey
 
+/** Developer-only settings, reachable from the More tab in debug builds. */
+@Serializable
+data object DebugSettings : NavKey
+
 @Composable
 fun AppNavigation() {
     val backStack = rememberNavBackStack(Home)
@@ -31,10 +35,16 @@ fun AppNavigation() {
         ),
         entryProvider = entryProvider {
             entry<Home> {
-                HomeScreen(onPorchClick = { porchId -> backStack.add(PorchDetail(porchId)) })
+                HomeScreen(
+                    onPorchClick = { porchId -> backStack.add(PorchDetail(porchId)) },
+                    onOpenDebugSettings = { backStack.add(DebugSettings) },
+                )
             }
             entry<PorchDetail> { key ->
                 PorchDetailScreen(porchId = key.porchId, onBack = { backStack.removeLastOrNull() })
+            }
+            entry<DebugSettings> {
+                DebugSettingsScreen(onBack = { backStack.removeLastOrNull() })
             }
         },
     )

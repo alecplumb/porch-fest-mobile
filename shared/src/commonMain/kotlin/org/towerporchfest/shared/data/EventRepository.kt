@@ -14,6 +14,7 @@ import org.towerporchfest.shared.model.MapPin
 import org.towerporchfest.shared.model.Porch
 import org.towerporchfest.shared.model.PorchPerformance
 import org.towerporchfest.shared.model.ScheduleItem
+import org.towerporchfest.shared.model.Sponsor
 import org.towerporchfest.shared.model.porchLabel
 
 data class ScheduleFilter(
@@ -122,6 +123,24 @@ class EventRepository internal constructor(
                         performerLink = row.performer_link,
                         performerImageUrl = row.performer_image_url,
                         genres = row.genre_names,
+                    )
+                }
+            }
+
+    /** Every sponsor, highest tier first. */
+    fun sponsors(): Flow<List<Sponsor>> =
+        queries.sponsors()
+            .asFlow()
+            .mapToList(dispatcher)
+            .map { rows ->
+                rows.map { row ->
+                    Sponsor(
+                        id = row.id,
+                        name = row.name,
+                        level = row.level.toInt(),
+                        website = row.website,
+                        logoUrl = row.logo_url,
+                        porchId = row.porch_id,
                     )
                 }
             }

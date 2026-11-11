@@ -1,10 +1,10 @@
-// Local development: the Django stack on this Mac (see the backend's local Docker setup).
+// Debug builds. Local development: the Django stack on this Mac (see the backend's local Docker setup).
 // "localhost" works from the simulator. In xcconfig files "//" starts a comment, so the
 // URL is written with $() between the slashes.
 PF_BASE_URL = http:/$()/localhost:8000
 PF_ENVIRONMENT = local
-PF_BUNDLE_ID_SUFFIX = .local
-PF_DISPLAY_NAME = Porch Fest (local)
+PF_BUNDLE_ID_SUFFIX = .debug
+PF_DISPLAY_NAME = Porch Fest (debug)
 // This plist allows plain-HTTP connections on the local network. Prod's does not.
 PF_INFOPLIST = Config/Info-Local.plist
 

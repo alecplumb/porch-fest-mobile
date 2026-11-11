@@ -20,13 +20,15 @@ import androidx.compose.ui.res.painterResource
 import org.towerporchfest.app.R
 
 private enum class HomeTab(val label: String, val icon: Int) {
+    PORCH("Porch", R.drawable.ic_porch),
     SCHEDULE("Schedule", R.drawable.ic_schedule),
     MAP("Map", R.drawable.ic_map),
+    MORE("More", R.drawable.ic_more),
 }
 
 @Composable
-fun HomeScreen(onPorchClick: (String) -> Unit) {
-    var tab by rememberSaveable { mutableStateOf(HomeTab.SCHEDULE) }
+fun HomeScreen(onPorchClick: (String) -> Unit, onOpenDebugSettings: () -> Unit) {
+    var tab by rememberSaveable { mutableStateOf(HomeTab.PORCH) }
     // Keeps each tab's scroll position and text input when switching between them.
     val tabState = rememberSaveableStateHolder()
 
@@ -47,8 +49,10 @@ fun HomeScreen(onPorchClick: (String) -> Unit) {
         Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             tabState.SaveableStateProvider(tab) {
                 when (tab) {
+                    HomeTab.PORCH -> PorchHomeScreen()
                     HomeTab.SCHEDULE -> ScheduleScreen(onPorchClick = onPorchClick)
                     HomeTab.MAP -> MapScreen(onOpenPorch = onPorchClick)
+                    HomeTab.MORE -> MoreScreen(onOpenDebugSettings = onOpenDebugSettings)
                 }
             }
         }

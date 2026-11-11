@@ -17,6 +17,7 @@ import org.koin.dsl.module
 import org.towerporchfest.shared.data.EventRepository
 import org.towerporchfest.shared.data.SyncEngine
 import org.towerporchfest.shared.di.commonModules
+import org.towerporchfest.shared.presentation.HomeViewModel
 import org.towerporchfest.shared.presentation.MapViewModel
 import org.towerporchfest.shared.presentation.PorchDetailViewModel
 import org.towerporchfest.shared.presentation.ScheduleViewModel
@@ -45,6 +46,7 @@ class KoinGraphTest {
             assertEquals(config, koin.get<AppConfig>())
             assertNotNull(koin.get<EventRepository>())
             assertNotNull(koin.get<SyncEngine>())
+            assertNotNull(koin.get<HomeViewModel>())
             assertNotNull(koin.get<ScheduleViewModel>())
             assertNotNull(koin.get<MapViewModel>())
             assertNotNull(koin.get<PorchDetailViewModel> { parametersOf("porch-blue") })

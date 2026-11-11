@@ -6,15 +6,22 @@ struct PorchRoute: Hashable {
 }
 
 enum RootTab: String {
-    case schedule, map
+    case porch, schedule, map, more
 }
 
 struct RootView: View {
-    // Pass `-initialTab map` as a launch argument to open on the map (for screenshots and UI tests).
-    @State private var tab = RootTab(rawValue: UserDefaults.standard.string(forKey: "initialTab") ?? "") ?? .schedule
+    // Pass `-initialTab map` (or schedule, more) as a launch argument to open on that tab, for
+    // screenshots and UI tests.
+    @State private var tab = RootTab(rawValue: UserDefaults.standard.string(forKey: "initialTab") ?? "") ?? .porch
 
     var body: some View {
         TabView(selection: $tab) {
+            NavigationStack {
+                PorchHomeView()
+            }
+            .tabItem { Label("Porch", systemImage: "house") }
+            .tag(RootTab.porch)
+
             NavigationStack {
                 ScheduleView()
                     .navigationDestination(for: PorchRoute.self) { PorchDetailView(porchId: $0.porchId) }
@@ -28,6 +35,12 @@ struct RootView: View {
             }
             .tabItem { Label("Map", systemImage: "map") }
             .tag(RootTab.map)
+
+            NavigationStack {
+                MoreView()
+            }
+            .tabItem { Label("More", systemImage: "ellipsis") }
+            .tag(RootTab.more)
         }
     }
 }

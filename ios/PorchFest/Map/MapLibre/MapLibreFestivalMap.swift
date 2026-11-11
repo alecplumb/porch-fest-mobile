@@ -17,9 +17,11 @@ private enum PinAttribute {
     static let sponsored = "sponsored"
 }
 
-private let pinColor = UIColor(red: 0.851, green: 0.282, blue: 0.059, alpha: 1)
-private let sponsoredColor = UIColor(red: 0.098, green: 0.443, blue: 0.761, alpha: 1)
-private let clusterColor = UIColor(red: 0.373, green: 0.239, blue: 0.769, alpha: 1)
+// The website's colours: gold porch pins, teal sponsored pins, indigo for clusters.
+private let pinColor = UIColor(red: 0xF2 / 255, green: 0xB8 / 255, blue: 0x14 / 255, alpha: 1)
+private let sponsoredColor = UIColor(red: 0x20 / 255, green: 0x8F / 255, blue: 0x95 / 255, alpha: 1)
+private let indigo = UIColor(red: 0x21 / 255, green: 0x21 / 255, blue: 0x33 / 255, alpha: 1)
+private let clusterColor = indigo
 
 /// Fonts served by the OpenFreeMap styles. A style from another provider may need a different name.
 private let labelFont = ["Noto Sans Bold"]
@@ -186,7 +188,12 @@ struct MapLibreFestivalMap: UIViewRepresentable {
             numbers.text = NSExpression(forKeyPath: PinAttribute.number)
             numbers.textFontNames = NSExpression(forConstantValue: labelFont)
             numbers.textFontSize = NSExpression(forConstantValue: 11)
-            numbers.textColor = white
+            // Indigo reads on gold; white reads on teal.
+            numbers.textColor = NSExpression(
+                forConditional: NSPredicate(format: "%K == YES", PinAttribute.sponsored),
+                trueExpression: white,
+                falseExpression: NSExpression(forConstantValue: indigo)
+            )
             numbers.textAllowsOverlap = NSExpression(forConstantValue: true)
             numbers.textIgnoresPlacement = NSExpression(forConstantValue: true)
             style.addLayer(numbers)

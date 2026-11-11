@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelStore
 import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform
 import org.towerporchfest.shared.AppConfig
+import org.towerporchfest.shared.presentation.HomeViewModel
 import org.towerporchfest.shared.presentation.MapViewModel
 import org.towerporchfest.shared.presentation.PorchDetailViewModel
 import org.towerporchfest.shared.presentation.ScheduleViewModel
@@ -24,6 +25,8 @@ object KoinHelper {
  */
 class ViewModelOwner {
     private val store = ViewModelStore()
+
+    fun homeViewModel(): HomeViewModel = resolve("home") { KoinPlatform.getKoin().get() }
 
     fun scheduleViewModel(): ScheduleViewModel = resolve("schedule") { KoinPlatform.getKoin().get() }
 

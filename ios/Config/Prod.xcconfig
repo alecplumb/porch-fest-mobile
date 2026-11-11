@@ -1,3 +1,4 @@
+// Release builds: production.
 PF_BASE_URL = https:/$()/towerporchfest.org
 PF_ENVIRONMENT = prod
 PF_BUNDLE_ID_SUFFIX =

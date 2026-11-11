@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.towerporchfest.shared.data.SyncStatus
+import org.towerporchfest.shared.presentation.HomeViewModel
 import org.towerporchfest.shared.presentation.MapViewModel
 import org.towerporchfest.shared.presentation.ScheduleUiState
 import org.towerporchfest.shared.presentation.ScheduleViewModel
@@ -86,6 +87,20 @@ class ScheduleViewModelTest {
             viewModel.refresh()
             val state = awaitUntil { it.sync is SyncStatus.Failed }
             assertTrue(state.hasNoData)
+        }
+    }
+
+    @Test
+    fun homeGroupsSponsorsByTierWithWebsiteHeadings() = runTest(dispatcher) {
+        val graph = TestGraph(dispatcher).also { it.syncEngine.sync() }
+        val viewModel = HomeViewModel(graph.repository, graph.syncEngine)
+
+        viewModel.state.test {
+            val state = awaitUntil { it.sponsorGroups.size == 2 }
+
+            assertEquals(listOf("Event Sponsor", "Platinum Sponsors"), state.sponsorGroups.map { it.title })
+            // Within a tier, names sort without regard to case.
+            assertEquals(listOf("alpha Print", "Tower Yoga"), state.sponsorGroups[1].sponsors.map { it.name })
         }
     }
 

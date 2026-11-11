@@ -23,4 +23,6 @@ internal actual val platformModule: Module = module {
     }
 }
 
-private const val DATABASE_NAME = "porchfest.db"
+// The database is a cache of the server. When its schema changes, change this name: the app
+// starts with an empty database and the next sync refills it. (v2: sponsors table.)
+private const val DATABASE_NAME = "porchfest-v2.db"

@@ -10,7 +10,7 @@ engine, and its environment settings.
       data/remote/    PorchFestApi: one Ktor call to the snapshot endpoint
       data/local/     SQLDelight database (src/commonMain/sqldelight/.../PorchFest.sq)
       data/           SyncEngine (writes), EventRepository (reads)
-      presentation/   ScheduleViewModel, MapViewModel, PorchDetailViewModel
+      presentation/   HomeViewModel, ScheduleViewModel, MapViewModel, PorchDetailViewModel
       di/             Koin modules and initKoin()
 
     android/  Jetpack Compose          ios/  SwiftUI
@@ -46,6 +46,18 @@ since midnight and treats an end time earlier than the start as the following da
 The snapshot carries a `schema_version`. A build refuses a version newer than it understands
 and asks the user to update, so the backend can change the format without corrupting old apps.
 
+## Sponsors
+
+The home tab lists sponsors by tier, like the website's home page. The list comes from the
+snapshot's top-level `sponsors` array and is stored with everything else. A backend that does
+not send that array still attaches a sponsor to each sponsored porch, and `SyncEngine` builds
+the list from those instead; that fallback misses sponsors with no porch on the map.
+`SyncEngine.insertSponsors` is the only code that knows there are two sources.
+
+Logos are loaded from the backend's URLs when shown (Coil on Android, `AsyncImage` on iOS) and
+cached by those libraries. A logo that has never been loaded shows the sponsor's name when the
+phone is offline.
+
 ## Maps
 
 Both apps use MapLibre with [OpenFreeMap](https://openfreemap.org) tiles: open source, no API
@@ -69,8 +81,19 @@ Koin resolves dependencies at runtime, so `KoinGraphTest` resolves every entry p
 ## Configuration
 
 The shared module contains no URLs. Each app builds an `AppConfig` (base URL, environment name,
-map style URL) from its own build settings and passes it to `initKoin`. See the README for the
-environments.
+map style URL) from its own build settings and passes it to `initKoin`. Debug builds use the
+local backend and release builds use production; see the README.
+
+Debug builds have a Debug Settings screen (More tab) on both platforms. It is a separate screen
+in each app, not shared UI, so each can add platform-specific developer settings; today it only
+displays the `AppConfig` in use.
+
+## Brand
+
+Colours come from the website's stylesheet: indigo `#212133`, slate blue `#6F91A5`, gold
+`#F2B814`, beige `#EBE2D8`. Android defines them in `theme/Color.kt` and `res/values/colors.xml`,
+iOS in colour sets in `Assets.xcassets`. The website has no dark mode; the apps' dark themes are
+built on the indigo. The festival logo is navy line art, so it is always shown on beige.
 
 ## Splitting into separate repos
 

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  `local` flavor only: the development backend is plain HTTP (10.0.2.2 from the emulator,
-  or your machine's LAN address from a phone). The prod flavor has no such file, so it
-  keeps Android's default of HTTPS only.
--->
-<network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
-</network-security-config>

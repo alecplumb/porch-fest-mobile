@@ -12,6 +12,7 @@ import org.towerporchfest.shared.data.SyncEngine
 import org.towerporchfest.shared.data.local.PorchFestDatabase
 import org.towerporchfest.shared.data.remote.PorchFestApi
 import org.towerporchfest.shared.data.remote.createHttpClient
+import org.towerporchfest.shared.presentation.HomeViewModel
 import org.towerporchfest.shared.presentation.MapViewModel
 import org.towerporchfest.shared.presentation.PorchDetailViewModel
 import org.towerporchfest.shared.presentation.ScheduleViewModel
@@ -36,6 +37,7 @@ internal val repositoryModule = module {
 }
 
 internal val viewModelModule = module {
+    viewModel { HomeViewModel(repository = get(), syncEngine = get()) }
     viewModel { ScheduleViewModel(repository = get(), syncEngine = get()) }
     viewModel { MapViewModel(repository = get(), syncEngine = get()) }
     viewModel { (porchId: String) -> PorchDetailViewModel(porchId = porchId, repository = get()) }

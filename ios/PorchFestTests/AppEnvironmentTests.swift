@@ -20,8 +20,8 @@ final class AppEnvironmentTests: XCTestCase {
         XCTAssertEqual(environment.name, "prod")
     }
 
-    func testLocalSchemeIsWiredToTheLocalBackend() {
-        // The test bundle is hosted by the app built with the Debug-Local configuration.
+    func testDebugBuildIsWiredToTheLocalBackend() {
+        // The test bundle is hosted by the app built with the Debug configuration.
         XCTAssertEqual(AppEnvironment.current.name, "local")
         XCTAssertTrue(AppEnvironment.current.baseURL.hasPrefix("http://"))
     }

@@ -14,6 +14,7 @@ import org.towerporchfest.shared.data.local.Porch_row as PorchRow
 import org.towerporchfest.shared.data.local.PorchFestDatabase
 import org.towerporchfest.shared.data.remote.PorchFestApi
 import org.towerporchfest.shared.data.remote.SnapshotDto
+import org.towerporchfest.shared.data.remote.SponsorDto
 import org.towerporchfest.shared.data.remote.SnapshotResponse
 import org.towerporchfest.shared.model.normalizeEndMinute
 import org.towerporchfest.shared.model.parseMinuteOfDay
@@ -87,6 +88,7 @@ class SyncEngine internal constructor(
         val queries = database.porchFestQueries
         database.transaction {
             queries.deletePerformances()
+            queries.deleteSponsors()
             queries.deletePerformerGenres()
             queries.deletePerformers()
             queries.deletePorches()
@@ -143,7 +145,42 @@ class SyncEngine internal constructor(
                     end_minute = normalizeEndMinute(start, parseMinuteOfDay(performance.endTime)).toLong(),
                 )
             }
+            insertSponsors(snapshot)
             queries.saveSyncMeta(etag, nowEpochMillis())
+        }
+    }
+
+    /**
+     * The one place that decides where the sponsor list comes from. A server that sends the
+     * snapshot's `sponsors` list is the source of truth. An older server only attaches sponsors
+     * to porches, so the list is rebuilt from those; it then lacks sponsors without a porch.
+     */
+    private fun insertSponsors(snapshot: SnapshotDto) {
+        val queries = database.porchFestQueries
+        val fromServer = snapshot.sponsors
+        if (fromServer != null) {
+            fromServer.forEach { sponsor ->
+                queries.insertSponsor(
+                    id = sponsor.id.toString(),
+                    name = sponsor.name,
+                    level = sponsor.level.toLong(),
+                    website = sponsor.website.orEmpty(),
+                    logo_url = sponsor.logoUrl,
+                    porch_id = sponsor.porchId,
+                )
+            }
+            return
+        }
+        snapshot.porches.forEach { porch ->
+            val sponsor = porch.sponsor ?: return@forEach
+            queries.insertSponsor(
+                id = "porch:${porch.id}",
+                name = sponsor.name,
+                level = (sponsor.level ?: SponsorDto.DEFAULT_LEVEL).toLong(),
+                website = sponsor.website.orEmpty(),
+                logo_url = sponsor.logoUrl,
+                porch_id = porch.id,
+            )
         }
     }
 

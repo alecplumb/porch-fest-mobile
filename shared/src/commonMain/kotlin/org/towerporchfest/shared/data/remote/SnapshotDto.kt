@@ -11,6 +11,8 @@ internal data class SnapshotDto(
     val performers: List<PerformerDto> = emptyList(),
     val porches: List<PorchDto> = emptyList(),
     val performances: List<PerformanceDto> = emptyList(),
+    /** Null when the server predates the sponsors list; see SyncEngine for the fallback. */
+    val sponsors: List<SponsorListItemDto>? = null,
 )
 
 @Serializable
@@ -33,6 +35,22 @@ internal data class SponsorDto(
     val level: Int? = null,
     val website: String? = null,
     @SerialName("logo_url") val logoUrl: String? = null,
+) {
+    companion object {
+        /** Community, the lowest tier: where a sponsor with no stated level is listed. */
+        const val DEFAULT_LEVEL = 4
+    }
+}
+
+/** An entry in the snapshot's top-level `sponsors` list. */
+@Serializable
+internal data class SponsorListItemDto(
+    val id: Int,
+    val name: String,
+    val level: Int = SponsorDto.DEFAULT_LEVEL,
+    val website: String? = null,
+    @SerialName("logo_url") val logoUrl: String? = null,
+    @SerialName("porch_id") val porchId: String? = null,
 )
 
 @Serializable

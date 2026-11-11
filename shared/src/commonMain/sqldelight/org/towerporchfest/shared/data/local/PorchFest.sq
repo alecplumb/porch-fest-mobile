@@ -62,6 +62,16 @@ CREATE TABLE performance_row (
 CREATE INDEX performance_porch ON performance_row(porch_id);
 CREATE INDEX performance_start ON performance_row(start_minute);
 
+-- Every active sponsor, including those with no porch on the map.
+CREATE TABLE sponsor_row (
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  level INTEGER NOT NULL,
+  website TEXT NOT NULL,
+  logo_url TEXT,
+  porch_id TEXT
+);
+
 CREATE TABLE sync_meta (
   id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
   etag TEXT,
@@ -73,6 +83,7 @@ deletePerformers: DELETE FROM performer_row;
 deletePerformerGenres: DELETE FROM performer_genre;
 deletePorches: DELETE FROM porch_row;
 deletePerformances: DELETE FROM performance_row;
+deleteSponsors: DELETE FROM sponsor_row;
 
 insertGenre:
 INSERT INTO genre_row(id, name, slug) VALUES (?, ?, ?);
@@ -88,6 +99,9 @@ INSERT INTO porch_row VALUES ?;
 
 insertPerformance:
 INSERT INTO performance_row(id, porch_id, performer_id, start_minute, end_minute) VALUES (?, ?, ?, ?, ?);
+
+insertSponsor:
+INSERT OR REPLACE INTO sponsor_row(id, name, level, website, logo_url, porch_id) VALUES (?, ?, ?, ?, ?, ?);
 
 saveSyncMeta:
 INSERT OR REPLACE INTO sync_meta(id, etag, last_synced_at) VALUES (1, ?, ?);
@@ -146,6 +160,12 @@ SELECT
   (SELECT count(*) FROM performance_row pf WHERE pf.porch_id = po.id) AS performance_count
 FROM porch_row po
 ORDER BY po.number IS NULL, po.number, po.name;
+
+-- Lower level number is the higher tier, as on the website.
+sponsors:
+SELECT id, name, level, website, logo_url, porch_id
+FROM sponsor_row
+ORDER BY level, name;
 
 porchById:
 SELECT * FROM porch_row WHERE id = ?;

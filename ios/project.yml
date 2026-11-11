@@ -8,30 +8,23 @@ options:
   createIntermediateGroups: true
   groupSortPosition: top
 
-# One build configuration per environment. Names have no spaces because they become
-# directory names in the shared framework's output path.
+# Debug builds talk to the local backend; Release builds talk to production. Switching
+# environment inside a debug build will live in the app's Debug Settings screen.
 configs:
-  Debug-Local: debug
-  Debug-Prod: debug
-  Release-Prod: release
+  Debug: debug
+  Release: release
 configFiles:
-  Debug-Local: Config/Local.xcconfig
-  Debug-Prod: Config/Prod.xcconfig
-  Release-Prod: Config/Prod.xcconfig
+  Debug: Config/Local.xcconfig
+  Release: Config/Prod.xcconfig
 
 settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-  configs:
-    # Tells the Kotlin Gradle plugin which framework variant to build for each configuration.
-    Debug-Local:
-      KOTLIN_FRAMEWORK_BUILD_TYPE: debug
-    Debug-Prod:
-      KOTLIN_FRAMEWORK_BUILD_TYPE: debug
-    Release-Prod:
-      KOTLIN_FRAMEWORK_BUILD_TYPE: release
+    # The shared Kotlin framework is built for Apple silicon simulators only (iosSimulatorArm64),
+    # so never ask for an Intel simulator slice. Release builds would otherwise request one.
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
 
 packages:
   # Used only inside PorchFest/Map/MapLibre; the rest of the app talks to FestivalMapView.
@@ -80,31 +73,19 @@ targets:
         FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
 
 schemes:
-  PorchFest Local:
+  PorchFest:
     build:
       targets:
         PorchFest: all
         PorchFestTests: [test]
     run:
-      config: Debug-Local
+      config: Debug
     test:
-      config: Debug-Local
+      config: Debug
       targets: [PorchFestTests]
     profile:
-      config: Debug-Local
+      config: Release
     analyze:
-      config: Debug-Local
+      config: Debug
     archive:
-      config: Debug-Local
-  PorchFest Prod:
-    build:
-      targets:
-        PorchFest: all
-    run:
-      config: Debug-Prod
-    profile:
-      config: Release-Prod
-    analyze:
-      config: Debug-Prod
-    archive:
-      config: Release-Prod
+      config: Release
